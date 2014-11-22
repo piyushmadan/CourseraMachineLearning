@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title></title>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<p>setwd(&ldquo;/Users/caris/Documents/projects/DataScience/PracticalMachineLearning&rdquo;)</p>
+
+<p>#Step 1. Loading Data</p>
+
+<pre><code>traindata &lt;- read.csv(&quot;pml-training.csv&quot;)
+testdata &lt;- read.csv(&quot;pml-testing.csv&quot;)
+dim(training)
+</code></pre>
+
+<p>[1] 19622   160</p>
+
+<pre><code>dim(testing)
+</code></pre>
+
+<p>[1]  20 160</p>
+
+<p>#Step 2.  Preparing data for analysis</p>
+
+<pre><code>library(caret)
+set.seed(34543)
+trainset &lt;- createDataPartition(traindata$classe, p = 0.6, list = FALSE)
+training &lt;- traindata[trainset, ]
+validation &lt;- traindata[-trainset, ]
+</code></pre>
+
+<p>#Step 3. nearZeroVar return where co-variance is almost </p>
+
+<pre><code>zeronzv &lt;- nearZeroVar(training)
+training_nzv  &lt;- training[ ,-nzv]
+</code></pre>
+
+<p>#Step 4. Using Training data to model using Rain Forest Algorithm</p>
+
+<pre><code>#Use Multi core processing 
+library(doMC)
+registerDoMC(cores = 2)
+
+modelRainForest &lt;-train(classe~.,data=training_nzv,method=&quot;rf&quot;)
+modelRainForest
+
+Random Forest 
+
+11776 samples
+   61 predictor
+    5 classes: &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39; 
+
+No pre-processing
+Resampling: Bootstrapped (25 reps) 
+
+Summary of sample sizes: 142, 142, 142, 142, 142, 142, ... 
+
+Resampling results across tuning parameters:
+
+  mtry  Accuracy   Kappa      Accuracy SD  Kappa SD  
+   2    0.7158013  0.6359672  0.055653690  0.07217477
+  42    0.9687090  0.9600441  0.032741147  0.04159855
+  83    0.9983974  0.9979479  0.005551445  0.00710876
+
+Accuracy was used to select the optimal model using  the largest value.
+The final value used for the model was mtry = 83. 
+</code></pre>
+
+<p>#Step 4. Validation and Out of Sample Error</p>
+
+<pre><code>predictTraining &lt;- predict(modelRainForest, training_nzv)
+confusionMatrix(predictTraining, training_nzv$classe)
+predictTraining &lt;- predict(modelRainForest, validation)
+confusionMatrix(predictTraining, training$classe) 
+</code></pre>
+
+<p>#Step 5. Predict Value for given data</p>
+
+<pre><code>predictTraining &lt;- predict(modelRainForest, testing)
+confusionMatrix(predictTraining, training$classe)
+</code></pre>
+
+<p>#To convert this R.md to html</p>
+
+<pre><code>markdownToHTML(&quot;CourseraMachineLearning/solution.md&quot;, &quot;CourseraMachineLearning/solution.html&quot;)
+</code></pre>
+
+</body>
+
+</html>

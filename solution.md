@@ -28,6 +28,10 @@ training_nzv  <- training[ ,-nzv]
 ```
 #Step 4. Using Training data to model using Rain Forest Algorithm
 ```
+#Use Multi core processing 
+library(doMC)
+registerDoMC(cores = 2)
+
 modelRainForest <-train(classe~.,data=training_nzv,method="rf")
 modelRainForest
 
@@ -65,4 +69,9 @@ confusionMatrix(predictTraining, training$classe)
 ```
 predictTraining <- predict(modelRainForest, testing)
 confusionMatrix(predictTraining, training$classe)
+```
+
+#To convert this R.md to html
+```
+markdownToHTML("CourseraMachineLearning/solution.md", "CourseraMachineLearning/solution.html")
 ```
